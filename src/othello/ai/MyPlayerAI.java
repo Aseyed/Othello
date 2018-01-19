@@ -127,6 +127,31 @@ public class MyPlayerAI extends ReversiAI {
 	}
 
 	
+	private double min(Board b, double alpha, double beta,int depth){
+
+		double min_v=100000;
+
+		if (depth==9){
+			return b.getScore();
+		}
+		depth++;
+		for (int j = 0; j < size; j++) {
+			for (int i = 0; i < size; i++) {
+				if (b.move(i, j))
+				{
+					min_v=Math.min(max(b,alpha,beta,depth),min_v);
+					if (min_v<alpha)
+					    return min_v;
+					beta = Math.min(min_v,beta);
+				}
+			}
+		}
+		if (min_v>100000)
+		    return -100000;
+		else
+		    return min_v;
+	}
+
 	
 
 	@Override
