@@ -102,6 +102,6 @@ public class MyPlayerAI extends ReversiAI {
 	@Override
 	public String getName() {
 		//IMPORTANT: your student number here
-		return new String("9330000");
+		return new String("9325243-9323613");
 	}
 }
