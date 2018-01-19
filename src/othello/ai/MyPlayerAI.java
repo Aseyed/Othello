@@ -98,6 +98,36 @@ public class MyPlayerAI extends ReversiAI {
 
 
 	}
+	
+	
+	
+	private double max(Board b, double alpha, double beta,int depth){
+
+		double max_v=-100000;
+
+		if (depth==9){
+			return b.getScore();
+		}
+		depth++;
+		for (int j = 0; j < size; j++) {
+			for (int i = 0; i < size; i++) {
+				if (b.move(i, j))
+				{
+					max_v = Math.max(min(b,alpha,beta,depth),max_v);
+					if (max_v>beta)
+					    return max_v;
+					alpha = Math.max(max_v,alpha);
+				}
+			}
+		}
+		if (max_v == -100000)
+		    return 100000;
+		else
+		    return max_v;
+	}
+
+	
+	
 
 	@Override
 	public String getName() {
