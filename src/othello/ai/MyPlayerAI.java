@@ -1,19 +1,80 @@
 package othello.ai;
 
+import java.
 import java.awt.Point;
+import java.util.List;
+import java.util.Vector;
 
 import othello.model.Board;
+
+import javax.swing.*;
+
 
 // your AI here. currently will choose first possible move
 public class MyPlayerAI extends ReversiAI {
 
-	@Override
+    private int __depth;
+
+    public MyPlayerAI(){__depth = 7;}
+
+
+    double alpha = Double.NEGATIVE_INFINITY;
+    double betha = Double.POSITIVE_INFINITY;
+
+    int tmpDepth = 0;
+
+    double tmp;
+    Point current_move  = null;
+
+    double max_val = Double.NEGATIVE_INFINITY;
+
+    List<Point> moves = new Vector<>();
+
+
+    public List findMoves(Board b){
+        List<Point> moves = new Vector<>();
+
+        for(int j=0; j < size; j++){
+            for(int i=0; i<size; i++ ){
+                Board tmpBoard = new Board(b);
+                if(tmpBoard.move(i, j))
+                    moves.add(new Point(i,j));
+            }
+        }
+
+        return moves;
+    }
+
+
+    public Point minmax(Board state, double depth){
+
+
+        return ;
+
+    }
+
+    @Override
 	public Point nextMove(Board b) {
-		for (int j = 0; j < size; j++)
-			for (int i = 0; i < size; i++)
-				if (b.move(i, j))
-					return new Point(i, j);
-		return null;
+
+        Point move = null;
+
+        Board newBoard = new Board(b);
+
+        long start = System.nanoTime();
+
+        move = minmax(newBoard, this.__depth);
+
+        long end = System.nanoTime();
+
+        long duration = (end-start) / 1000000;
+        System.console().printf("Duration: " + duration + "ms");
+        return move;
+
+//		for (int j = 0; j < size; j++)
+//			for (int i = 0; i < size; i++)
+//				if (b.move(i, j))
+//					return new Point(i, j);
+//		return null;
 
 		/*{
 			b.isCapturedByMe(x, y);					// square (x, y) is mine
@@ -32,11 +93,15 @@ public class MyPlayerAI extends ReversiAI {
 			b.getTotal(false);						//number of cells captured by my opponent
 			this.size;								//board size (always 8)
 		}*/
+
+
+
+
 	}
 
 	@Override
 	public String getName() {
 		//IMPORTANT: your student number here
-		return new String("9300000");
+		return new String("9330000");
 	}
 }
