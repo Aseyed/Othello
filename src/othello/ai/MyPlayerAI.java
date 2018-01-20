@@ -1,81 +1,121 @@
 package othello.ai;
 
-import java.
-import java.awt.Point;
+import java.awt.*;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
 import othello.model.Board;
 
-import javax.swing.*;
-
-
 // your AI here. currently will choose first possible move
 public class MyPlayerAI extends ReversiAI {
 
-    private int __depth;
-
-    public MyPlayerAI(){__depth = 7;}
-
-
-    double alpha = Double.NEGATIVE_INFINITY;
-    double betha = Double.POSITIVE_INFINITY;
-
-    int tmpDepth = 0;
-
-    double tmp;
-    Point current_move  = null;
-
-    double max_val = Double.NEGATIVE_INFINITY;
-
-    List<Point> moves = new Vector<>();
+    int __depth;
+    Point __move = null;
 
 
-    public List findMoves(Board b){
-        List<Point> moves = new Vector<>();
+    private double max(Board state, double alpha, double beta) {
+        __depth++;
+        int score;
+        if (state.getMoveCount(true) == 0) {
+            // board.print();
+            score = state.getTotal(true);
+            if (score > alpha)
+                alpha = score;
+        } else if (__depth < 8) {
+//            int bestScore = Integer.MIN_VALUE; //keep track of best score for Max. Start at negative infinite
+            List<Point> moves = generateMoves(state); //generate possible moves for this state
+            for (Point move : moves) {
+                Board moveState = this.applyMoveCloning(move, state); //apply move into state clone
+                moveState.turn();
 
-        for(int j=0; j < size; j++){
-            for(int i=0; i<size; i++ ){
-                Board tmpBoard = new Board(b);
-                if(tmpBoard.move(i, j))
-                    moves.add(new Point(i,j));
+                double s = min(moveState, alpha, beta);
+                __depth--;
+//                bestScore = (int) Math.max(s, bestScore);
+                if (s > alpha) {
+                    alpha = s;
+
+                    if (__depth == 1) {
+                        __move = new Point((int) move.getX(), (int) move.getY());
+                    }
+                }
+                if (beta <= alpha)
+                    break;
+
+            }
+        } else {
+            alpha = state.getTotal(true);
+        }
+        return alpha;
+    }
+
+    private double min(Board state, double alpha, double beta) {
+
+        __depth++;
+        int score;
+        if (state.getMoveCount(true) == 0) {
+            // board.print();
+            score = state.getTotal(false);
+            if (score < beta)
+                beta = score;
+        } else {
+//            int bestScore = Integer.MAX_VALUE; //keep track of best score for Min. Start at positive infinite
+            List<Point> moves = this.generateMoves(state);
+            for (Point move : moves) {
+                Board moveState = this.applyMoveCloning(move, state); //apply move into state clone
+                moveState.turn();
+
+                double resault = max(moveState, alpha, beta);
+                __depth--;
+                if (beta > resault) {
+                    beta = resault;
+                }
+//                    bestScore = (int) Math.min(s, bestScore);
+//                    beta = Math.min(bestScore, beta);
+
+                if (beta <= alpha)
+                    break;
+
             }
         }
 
-        return moves;
+        return beta;
+    }
+
+    private List<Point> generateMoves(Board state) {
+        List<Point> pointList = new Vector<>();
+
+        for (int j = 0; j < state.getSize(); j++) {
+            for (int i = 0; i < state.getSize(); i++) {
+                Board tempState = new Board(state);
+                if (tempState.move(i, j))
+                    pointList.add(new Point(i, j));
+            }
+        }
+
+        pointList.sort(new Comparator<Point>() {
+            @Override
+            public int compare(Point point, Point t1) {
+                if(__array[(int) point.getX()][(int) point.getX()] < __array[(int) t1.getX()][(int) t1.getX()])
+                    return 1;
+                return -1;
+            }
+        });
+        return pointList;
     }
 
 
-    public Point minmax(Board state, double depth){
-
-
-        return ;
-
-    }
 
     @Override
-	public Point nextMove(Board b) {
+    public Point nextMove(Board b) {
 
-        Point move = null;
-
-        Board newBoard = new Board(b);
-
-        long start = System.nanoTime();
-
-        move = minmax(newBoard, this.__depth);
-
-        long end = System.nanoTime();
-
-        long duration = (end-start) / 1000000;
-        System.console().printf("Duration: " + duration + "ms");
-        return move;
-
-//		for (int j = 0; j < size; j++)
-//			for (int i = 0; i < size; i++)
-//				if (b.move(i, j))
-//					return new Point(i, j);
-//		return null;
-
+        __depth = 0;
+        long startTime = System.nanoTime();
+        double value = max(b, (double) Integer.MIN_VALUE, (double) Integer.MAX_VALUE);
+        long endTime = System.nanoTime();
+        long duration = ((endTime - startTime) / 1000000);
+        System.out.println("Minimax took " + duration + " milliseconds.");
+        return __move;
 		/*{
 			b.isCapturedByMe(x, y);					// square (x, y) is mine
 			b.isCapturedByMyOppoenet(x, y);			// square (x, y) is for my opponent
@@ -86,77 +126,43 @@ public class MyPlayerAI extends ReversiAI {
 			b.print();								// ASCII printout of the current board
 			if(b.getActive() == Board.WHITE)		//I am White
 			if(b.getActive() == Board.BLACK)		//I am Black
-			
+
 			b.getMoveCount(true);					//number of possible moves for me
 			b.getMoveCount(false);					//number of possible moves for my opponent
 			b.getTotal(true);						//number of cells captured by me
 			b.getTotal(false);						//number of cells captured by my opponent
 			this.size;								//board size (always 8)
 		}*/
+    }
 
+    @Override
+    public String getName() {
+        //IMPORTANT: your student number here
+        return new String("9325243");
+    }
 
+    public Board applyMoveCloning(Point move, Board state) {
+        Board newState = clone(state);
+        newState.move(move.x, move.y);
+        return newState;
+    }
 
+    /*
+     * Makes a copy of a game state
+     */
+    public Board clone(Board state) {
+        Board newState = new Board(state);
+        return newState;
+    }
 
-	}
-	
-	
-	
-	private double max(Board b, double alpha, double beta,int depth){
-
-		double max_v=-100000;
-
-		if (depth==9){
-			return b.getScore();
-		}
-		depth++;
-		for (int j = 0; j < size; j++) {
-			for (int i = 0; i < size; i++) {
-				if (b.move(i, j))
-				{
-					max_v = Math.max(min(b,alpha,beta,depth),max_v);
-					if (max_v>beta)
-					    return max_v;
-					alpha = Math.max(max_v,alpha);
-				}
-			}
-		}
-		if (max_v == -100000)
-		    return 100000;
-		else
-		    return max_v;
-	}
-
-	
-	private double min(Board b, double alpha, double beta,int depth){
-
-		double min_v=100000;
-
-		if (depth==9){
-			return b.getScore();
-		}
-		depth++;
-		for (int j = 0; j < size; j++) {
-			for (int i = 0; i < size; i++) {
-				if (b.move(i, j))
-				{
-					min_v=Math.min(max(b,alpha,beta,depth),min_v);
-					if (min_v<alpha)
-					    return min_v;
-					beta = Math.min(min_v,beta);
-				}
-			}
-		}
-		if (min_v>100000)
-		    return -100000;
-		else
-		    return min_v;
-	}
-
-	
-
-	@Override
-	public String getName() {
-		//IMPORTANT: your student number here
-		return new String("9325243-9323613");
-	}
+    private int[][] __array = {
+            {-99, 5, 4, 3, 3, 4, 5, -99},
+            {5, 3, 2, 2, 2, 2, 3, 5},
+            {4, 2, 1, 1, 1, 1, 2, 4},
+            {3, 2, 1, 1, 1, 1, 2, 3},
+            {3, 2, 1, 1, 1, 1, 2, 3},
+            {4, 2, 1, 1, 1, 1, 2, 4},
+            {5, 3, 2, 2, 2, 2, 3, 5},
+            {-99, 5, 4, 3, 3, 4, 5, -99}};
 }
+
