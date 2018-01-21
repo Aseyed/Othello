@@ -138,7 +138,7 @@ public class MyPlayerAI extends ReversiAI {
     @Override
     public String getName() {
         //IMPORTANT: your student number here
-        return new String("9325243");
+        return new String("MyPlayerAI");
     }
 
     public Board applyMoveCloning(Point move, Board state) {
